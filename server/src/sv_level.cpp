@@ -398,6 +398,9 @@ void G_DoNewGame()
 	if (strlen(sv_startmapscript.cstring()))
 		AddCommandString(sv_startmapscript.cstring());
 
+	G_InitNew (d_mapname);
+	gameaction = ga_nothing;
+
 	for (Players::iterator it = players.begin();it != players.end();++it)
 	{
 		if (!(it->ingame()))
