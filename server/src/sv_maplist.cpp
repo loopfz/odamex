@@ -115,7 +115,6 @@ bool Maplist::insert(const size_t &position, maplist_entry_t &maplist_entry) {
 			for (OResFiles::const_iterator it = ::wadfiles.begin() + 1;
 			     it != ::wadfiles.end(); ++it)
 			{
-				size_t idx = it - ::wadfiles.begin();
 				maplist_entry.wads.push_back(it->getBasename());
 			}
 		}
@@ -129,12 +128,8 @@ bool Maplist::insert(const size_t &position, maplist_entry_t &maplist_entry) {
 		}
 	}
 
-	// capitalize the map name and WAD file names
+	// capitalize the map names
 	maplist_entry.map = StdStringToUpper(maplist_entry.map);
-
-	for (std::vector<std::string>::iterator it = maplist_entry.wads.begin();
-		it != maplist_entry.wads.end(); ++it)
-		*it = StdStringToUpper(*it);
 
 	// Puts the map into its proper place
 	this->maplist.insert(this->maplist.begin() + position, maplist_entry);
@@ -666,7 +661,7 @@ BEGIN_COMMAND (maplist) {
 		} else if (it->first == next_index) {
 			flag = '+';
 		}
-		Printf(PRINT_HIGH, "%c%d. %s %s\n", flag, it->first + 1,
+		Printf(PRINT_HIGH, "%c%lu. %s %s\n", flag, it->first + 1,
 			   JoinStrings(it->second->wads, " ").c_str(),
 			   it->second->map.c_str());
 	}

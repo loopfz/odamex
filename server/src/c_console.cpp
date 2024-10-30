@@ -24,6 +24,8 @@
 
 #include "odamex.h"
 
+#include <ctime>
+
 #include <stdarg.h>
 
 #include "m_memio.h"
@@ -70,7 +72,8 @@ char *TimeStamp()
 	{
 		if (log_fulltimestamps)
 		{
-            sprintf (stamp,
+            snprintf (stamp,
+                     38,
                      "[%.2d/%.2d/%.2d %.2d:%.2d:%.2d]",
                      lt->tm_mday,
                      lt->tm_mon + 1,	// localtime returns 0-based month
@@ -81,7 +84,8 @@ char *TimeStamp()
 		}
 		else
 		{
-            sprintf (stamp,
+            snprintf (stamp,
+                     38,
                      "[%.2d:%.2d:%.2d]",
                      lt->tm_hour,
                      lt->tm_min,
