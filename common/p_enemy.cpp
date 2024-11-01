@@ -50,7 +50,7 @@ EXTERN_CVAR (co_zdoomphys)
 EXTERN_CVAR (co_novileghosts)
 EXTERN_CVAR(co_zdoomsound)
 EXTERN_CVAR(co_removesoullimit)
-EXTERN_CVAR(co_deadplayertarget)
+EXTERN_CVAR(sv_deadplayertarget)
 
 enum dirtype_t
 {
@@ -954,9 +954,9 @@ void A_Chase (AActor *actor)
 	// [RH] If the target is dead (and not a goal), stop chasing it.
 	if (actor->target && actor->target != actor->goal && actor->target->health <= 0)
 	{
-		// with co_deadplayertarget enabled, keep chasing the corpse
+		// with sv_deadplayertarget enabled, keep chasing the corpse
 		// to avoid breaking some maps
-		if (co_deadplayertarget && actor->target->type == MT_PLAYER)
+		if (multiplayer && sv_deadplayertarget && actor->target->type == MT_PLAYER && players.size() > 0)
 		{
 			// test for sound like we would if we were in A_Look
 			// to let go of the corpse target asap in favor of a real player
@@ -997,7 +997,7 @@ void A_Chase (AActor *actor)
 		}
 	}
 
-	if (co_deadplayertarget && actor->target && actor->target->health <= 0) // let enemy move towards corpse
+	if (multiplayer && sv_deadplayertarget && actor->target && actor->target->health <= 0) // let enemy move towards corpse
 		goto nomissile;
 
 	// do not attack twice in a row

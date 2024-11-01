@@ -120,6 +120,10 @@ CVAR_RANGE(			sv_monstershealth, "1.0", "Amount to multiply monster health by",
 					CVARTYPE_FLOAT, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOENABLEDISABLE,
 					0.0f, 100.0f)
 
+CVAR(                           sv_deadplayertarget, "0", "Enemies keep chasing a dead player",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
+
+
 CVAR_RANGE(			sv_skill,"3", "Sets the skill level, values are:\n" \
 					"// 0 - No things mode\n" \
 					"// 1 - I'm Too Young To Die\n" \
@@ -322,9 +326,6 @@ CVAR_RANGE(sv_countdown, "5",
 
 	CVAR(			co_blockmapfix, "0", "Fix the blockmap collision bug",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH)
-
-	CVAR(                   co_deadplayertarget, "0", "Enemies keep chasing a dead player",
-					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
 
 	// Boom-compatibility changes
