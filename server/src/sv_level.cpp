@@ -357,10 +357,6 @@ void G_DoNewGame()
 		sv_curpwad.ForceSet(it->getBasename().c_str());
 	}
 
-	G_InitNew (d_mapname);
-
-	gameaction = ga_nothing;
-
 	// run script at the start of each map
 	// [ML] 8/22/2010: There are examples in the wiki that outright don't work
 	// when onlcvars (addcommandstring's second param) is true.  Is there a
