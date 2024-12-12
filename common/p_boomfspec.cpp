@@ -1697,16 +1697,19 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 		              s, accel);
 		break;
 
-	case 1024: // special 255 with tag control
+	 // special 255 with tag control
 	case 1025:
 	case 1026:
+	case 2085:
+	case 2086:
+		control = sides[*l->sidenum].sector - sectors;
+
+	case 1024:
+	case 2084:
 		if (l->id == 0)
 			Printf(PRINT_HIGH, "Line %d is missing a tag!", i);
 
-		if (special > 1024)
-			control = sides[*l->sidenum].sector - sectors;
-
-		if (special == 1026)
+		if (special == 1026 || special == 2086)
 			accel = 1;
 
 		s = lines[i].sidenum[0];
@@ -1714,14 +1717,27 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 		dy = sides[s].rowoffset / 8;
 		for (s = -1; (s = P_FindLineFromLineTag(l, s)) >= 0;)
 			if (s != i)
+			{
 				new DScroller(DScroller::sc_side, dx, dy, control, lines[s].sidenum[0],
 				              accel);
+				if (lines[s].sidenum[1] != R_NOSIDE)
+					new DScroller(DScroller::sc_side, -dx, dy, control, lines[s].sidenum[1],
+					              accel);
+			}
 		break;
 
+	case 2082: // scroll both sides left
+		if (lines[i].sidenum[1] != R_NOSIDE)
+			new DScroller(DScroller::sc_side, -FRACUNIT, 0, -1, lines[i].sidenum[1], accel);
+		// [[fallthrough]]
 	case 48: // scroll first side
 		new DScroller(DScroller::sc_side, FRACUNIT, 0, -1, lines[i].sidenum[0], accel);
 		break;
 
+	case 2083: // scroll both sides right
+		if (lines[i].sidenum[1] != R_NOSIDE)
+			new DScroller(DScroller::sc_side, FRACUNIT, 0, -1, lines[i].sidenum[1], accel);
+		// [[fallthrough]]
 	case 85: // jff 1/30/98 2-way scroll
 		new DScroller(DScroller::sc_side, -FRACUNIT, 0, -1, lines[i].sidenum[0], accel);
 		break;
