@@ -1517,6 +1517,38 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].mod = MOD_UNKNOWN;
 		}
 		break;
+
+	case 2048:
+		fixed_t xoffs = lines[i].dx;
+		fixed_t yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_xoffs += xoffs;
+			sectors[s].floor_yoffs += yoffs;
+		}
+		break;
+
+	case 2049:
+		fixed_t xoffs = lines[i].dx;
+		fixed_t yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_xoffs += xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+
+	case 2050:
+		fixed_t xoffs = lines[i].dx;
+		fixed_t yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_xoffs += xoffs;
+			sectors[s].floor_yoffs += yoffs;
+			sectors[s].ceiling_xoffs += xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
 	}
 }
 
