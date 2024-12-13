@@ -1458,6 +1458,9 @@ void P_SpawnCompatibleExtra(int i)
 	sector_t* sec;
 	float grav;
 	int damage;
+	fixed_t xoffs;
+	fixed_t yoffs;
+	angle_t angle;
 
 	switch (lines[i].special)
 	{
@@ -1519,8 +1522,8 @@ void P_SpawnCompatibleExtra(int i)
 		break;
 
 	case 2048:
-		fixed_t xoffs = lines[i].dx;
-		fixed_t yoffs = lines[i].dy;
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
 			sectors[s].floor_xoffs += xoffs;
@@ -1529,8 +1532,8 @@ void P_SpawnCompatibleExtra(int i)
 		break;
 
 	case 2049:
-		fixed_t xoffs = lines[i].dx;
-		fixed_t yoffs = lines[i].dy;
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
 			sectors[s].ceiling_xoffs += xoffs;
@@ -1539,14 +1542,22 @@ void P_SpawnCompatibleExtra(int i)
 		break;
 
 	case 2050:
-		fixed_t xoffs = lines[i].dx;
-		fixed_t yoffs = lines[i].dy;
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
 			sectors[s].floor_xoffs += xoffs;
 			sectors[s].floor_yoffs += yoffs;
 			sectors[s].ceiling_xoffs += xoffs;
 			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+
+	case 2051:
+		angle = lines[i].dx;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle += angle;
 		}
 		break;
 	}
