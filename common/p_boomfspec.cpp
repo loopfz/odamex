@@ -1554,12 +1554,69 @@ void P_SpawnCompatibleExtra(int i)
 		break;
 
 	case 2051:
-		angle = lines[i].dx;
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
-			sectors[s].floor_angle += angle;
+			sectors[s].floor_angle -= angle;
 		}
 		break;
+
+	case 2052:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_angle -= angle;
+		}
+		break;
+
+	case 2053:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].ceiling_angle -= angle;
+		}
+		break;
+
+	case 2054:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].floor_xoffs += xoffs;
+			sectors[s].floor_yoffs += yoffs;
+		}
+		break;
+
+	case 2055:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_angle -= angle;
+			sectors[s].ceiling_xoffs += xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+
+	case 2056:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].ceiling_angle -= angle;
+			sectors[s].floor_xoffs += xoffs;
+			sectors[s].floor_yoffs += yoffs;
+			sectors[s].ceiling_xoffs += xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+
 	}
 }
 
