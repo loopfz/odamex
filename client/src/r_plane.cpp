@@ -550,8 +550,8 @@ void R_DrawLevelPlane(visplane_t *pl)
 	// values for angle 0. This helps the texture to line up correctly.
 	if (pl->angle == 0)
 	{
-		pl_viewx = viewx + pl->xoffs;
-		pl_viewy = -viewy + pl->yoffs;
+		pl_viewx = pl->xoffs + viewx;
+		pl_viewy = pl->yoffs - viewy;
 	}
 	else
 	{
@@ -565,8 +565,8 @@ void R_DrawLevelPlane(visplane_t *pl)
 		}
 		else
 		{
-			pl_viewx = FixedMul(viewx + pl->xoffs, pl_cos) - FixedMul(viewy + pl->yoffs, pl_sin);
-			pl_viewy = -(FixedMul(viewx + pl->xoffs, pl_sin) + FixedMul(viewy + pl->yoffs, pl_cos));
+			pl_viewx = FixedMul(viewx + pl->xoffs, pl_cos) - FixedMul(viewy - pl->yoffs, pl_sin);
+			pl_viewy = -(FixedMul(viewx + pl->xoffs, pl_sin) + FixedMul(viewy - pl->yoffs, pl_cos));
 		}
 	}
 
