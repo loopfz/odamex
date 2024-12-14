@@ -1526,7 +1526,7 @@ void P_SpawnCompatibleExtra(int i)
 		yoffs = lines[i].dy;
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
-			sectors[s].floor_xoffs += xoffs;
+			sectors[s].floor_xoffs -= xoffs;
 			sectors[s].floor_yoffs += yoffs;
 		}
 		break;
@@ -1536,7 +1536,7 @@ void P_SpawnCompatibleExtra(int i)
 		yoffs = lines[i].dy;
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
-			sectors[s].ceiling_xoffs += xoffs;
+			sectors[s].ceiling_xoffs -= xoffs;
 			sectors[s].ceiling_yoffs += yoffs;
 		}
 		break;
@@ -1546,9 +1546,9 @@ void P_SpawnCompatibleExtra(int i)
 		yoffs = lines[i].dy;
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
-			sectors[s].floor_xoffs += xoffs;
+			sectors[s].floor_xoffs -= xoffs;
 			sectors[s].floor_yoffs += yoffs;
-			sectors[s].ceiling_xoffs += xoffs;
+			sectors[s].ceiling_xoffs -= xoffs;
 			sectors[s].ceiling_yoffs += yoffs;
 		}
 		break;
@@ -1585,7 +1585,7 @@ void P_SpawnCompatibleExtra(int i)
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
 			sectors[s].floor_angle -= angle;
-			sectors[s].floor_xoffs += xoffs;
+			sectors[s].floor_xoffs -= xoffs;
 			sectors[s].floor_yoffs += yoffs;
 		}
 		break;
@@ -1597,7 +1597,7 @@ void P_SpawnCompatibleExtra(int i)
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
 		{
 			sectors[s].ceiling_angle -= angle;
-			sectors[s].ceiling_xoffs += xoffs;
+			sectors[s].ceiling_xoffs -= xoffs;
 			sectors[s].ceiling_yoffs += yoffs;
 		}
 		break;
@@ -1610,9 +1610,9 @@ void P_SpawnCompatibleExtra(int i)
 		{
 			sectors[s].floor_angle -= angle;
 			sectors[s].ceiling_angle -= angle;
-			sectors[s].floor_xoffs += xoffs;
+			sectors[s].floor_xoffs -= xoffs;
 			sectors[s].floor_yoffs += yoffs;
-			sectors[s].ceiling_xoffs += xoffs;
+			sectors[s].ceiling_xoffs -= xoffs;
 			sectors[s].ceiling_yoffs += yoffs;
 		}
 		break;
