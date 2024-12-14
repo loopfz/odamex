@@ -1521,6 +1521,8 @@ void P_SpawnCompatibleExtra(int i)
 		}
 		break;
 
+	// 2048-2056 ID24 flat offset and rotation
+	// floor offset
 	case 2048:
 		xoffs = lines[i].dx;
 		yoffs = lines[i].dy;
@@ -1530,7 +1532,7 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].floor_yoffs += yoffs;
 		}
 		break;
-
+	// ceiling offset
 	case 2049:
 		xoffs = lines[i].dx;
 		yoffs = lines[i].dy;
@@ -1540,7 +1542,7 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].ceiling_yoffs += yoffs;
 		}
 		break;
-
+	// floor and ceiling offset
 	case 2050:
 		xoffs = lines[i].dx;
 		yoffs = lines[i].dy;
@@ -1552,7 +1554,7 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].ceiling_yoffs += yoffs;
 		}
 		break;
-
+	// floor rotation
 	case 2051:
 		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
@@ -1560,7 +1562,7 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].floor_angle -= angle;
 		}
 		break;
-
+	// ceiling rotation
 	case 2052:
 		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
@@ -1568,7 +1570,7 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].ceiling_angle -= angle;
 		}
 		break;
-
+	// floor and ceiling rotation
 	case 2053:
 		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
 		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
@@ -1577,7 +1579,7 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].ceiling_angle -= angle;
 		}
 		break;
-
+	// floor offset and rotation
 	case 2054:
 		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
 		xoffs = lines[i].dx;
@@ -1589,7 +1591,7 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].floor_yoffs += yoffs;
 		}
 		break;
-
+	// ceiling offset and rotation
 	case 2055:
 		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
 		xoffs = lines[i].dx;
@@ -1601,7 +1603,7 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].ceiling_yoffs += yoffs;
 		}
 		break;
-
+	// floor and ceiling offset and rotation
 	case 2056:
 		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
 		xoffs = lines[i].dx;
@@ -1797,14 +1799,14 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 		              s, accel);
 		break;
 
-	 // special 255 with tag control
+	// MBF21 scrollers and double sided variants from ID24
 	case 1025:
 	case 1026:
 	case 2085:
 	case 2086:
 		control = sides[*l->sidenum].sector - sectors;
 
-	case 1024:
+	case 1024: // special 255 with tag control
 	case 2084:
 		if (l->id == 0)
 			Printf(PRINT_HIGH, "Line %d is missing a tag!", i);
