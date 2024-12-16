@@ -417,11 +417,9 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		break;
 
 	case 40:
-		// RaiseCeilingLowerFloor
+		// RaiseCeilingLowerFloor -- only raises ceiling
 		EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(C_SLOW), 0, 0, 0,
 		             0, 0);
-		EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0, 0,
-		           0); // jff 02/12/98 doesn't work
 		return true;
 		//line->special = 0;
 		break;
