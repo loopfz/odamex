@@ -775,6 +775,8 @@ bool P_CheckTag(line_t* line)
 
 	case 48: // Scrolling walls
 	case 85:
+	case 2082:
+	case 2083:
 		return true; // zero tag allowed
 
 	default:

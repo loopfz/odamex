@@ -1456,6 +1456,9 @@ void P_SpawnCompatibleExtra(int i)
 	sector_t* sec;
 	float grav;
 	int damage;
+	fixed_t xoffs;
+	fixed_t yoffs;
+	angle_t angle;
 
 	switch (lines[i].special)
 	{
@@ -1515,6 +1518,105 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].mod = MOD_UNKNOWN;
 		}
 		break;
+
+	// 2048-2056 ID24 flat offset and rotation
+	// floor offset
+	case 2048:
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_xoffs -= xoffs;
+			sectors[s].floor_yoffs += yoffs;
+		}
+		break;
+	// ceiling offset
+	case 2049:
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_xoffs -= xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+	// floor and ceiling offset
+	case 2050:
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_xoffs -= xoffs;
+			sectors[s].floor_yoffs += yoffs;
+			sectors[s].ceiling_xoffs -= xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+	// floor rotation
+	case 2051:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+		}
+		break;
+	// ceiling rotation
+	case 2052:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_angle -= angle;
+		}
+		break;
+	// floor and ceiling rotation
+	case 2053:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].ceiling_angle -= angle;
+		}
+		break;
+	// floor offset and rotation
+	case 2054:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].floor_xoffs -= xoffs;
+			sectors[s].floor_yoffs += yoffs;
+		}
+		break;
+	// ceiling offset and rotation
+	case 2055:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_angle -= angle;
+			sectors[s].ceiling_xoffs -= xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+	// floor and ceiling offset and rotation
+	case 2056:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].ceiling_angle -= angle;
+			sectors[s].floor_xoffs -= xoffs;
+			sectors[s].floor_yoffs += yoffs;
+			sectors[s].ceiling_xoffs -= xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+
 	}
 }
 
@@ -1695,16 +1797,19 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 		              s, accel);
 		break;
 
-	case 1024: // special 255 with tag control
+	// MBF21 scrollers and double sided variants from ID24
 	case 1025:
 	case 1026:
+	case 2085:
+	case 2086:
+		control = sides[*l->sidenum].sector - sectors;
+
+	case 1024: // special 255 with tag control
+	case 2084:
 		if (l->id == 0)
 			Printf(PRINT_HIGH, "Line %d is missing a tag!", i);
 
-		if (special > 1024)
-			control = sides[*l->sidenum].sector - sectors;
-
-		if (special == 1026)
+		if (special == 1026 || special == 2086)
 			accel = 1;
 
 		s = lines[i].sidenum[0];
@@ -1712,14 +1817,27 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 		dy = sides[s].rowoffset / 8;
 		for (s = -1; (s = P_FindLineFromLineTag(l, s)) >= 0;)
 			if (s != i)
+			{
 				new DScroller(DScroller::sc_side, dx, dy, control, lines[s].sidenum[0],
 				              accel);
+				if (lines[s].sidenum[1] != R_NOSIDE)
+					new DScroller(DScroller::sc_side, -dx, dy, control, lines[s].sidenum[1],
+					              accel);
+			}
 		break;
 
+	case 2082: // scroll both sides left
+		if (lines[i].sidenum[1] != R_NOSIDE)
+			new DScroller(DScroller::sc_side, -FRACUNIT, 0, -1, lines[i].sidenum[1], accel);
+		// [[fallthrough]]
 	case 48: // scroll first side
 		new DScroller(DScroller::sc_side, FRACUNIT, 0, -1, lines[i].sidenum[0], accel);
 		break;
 
+	case 2083: // scroll both sides right
+		if (lines[i].sidenum[1] != R_NOSIDE)
+			new DScroller(DScroller::sc_side, FRACUNIT, 0, -1, lines[i].sidenum[1], accel);
+		// [[fallthrough]]
 	case 85: // jff 1/30/98 2-way scroll
 		new DScroller(DScroller::sc_side, -FRACUNIT, 0, -1, lines[i].sidenum[0], accel);
 		break;
