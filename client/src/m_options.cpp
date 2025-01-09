@@ -961,6 +961,7 @@ menu_t HUDMenu = {
 EXTERN_CVAR(message_showpickups)
 EXTERN_CVAR(message_showobituaries)
 EXTERN_CVAR (con_coloredmessages)
+EXTERN_CVAR (con_scaletext)
 EXTERN_CVAR (hud_scaletext)
 EXTERN_CVAR (msg0color)
 EXTERN_CVAR (msg1color)
@@ -1010,6 +1011,7 @@ static menuitem_t MessagesItems[] = {
 	{ slider,	"Center Message Timeout",{&con_midtime},		{1.0}, {10.0},	{0.25}, {NULL} },
 	{ slider,	"Scale message text",    {&hud_scaletext},		{1.0}, {4.0}, 	{1.0}, {NULL} },
 	{ discrete,	"Colorize messages",	{&con_coloredmessages},	{2.0}, {0.0},   {0.0},	{OnOff} },
+	{ slider,	"Scale console text",   {&con_scaletext},		{1.0}, {4.0}, 	{1.0}, {NULL} },
 	{ redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
 	{ yellowtext,"Display settings",		{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
 	{ discrete,	"Show pickup messages",	{&message_showpickups},	{2.0}, {0.0},   {0.0},	{OnOff} },
