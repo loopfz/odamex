@@ -1798,7 +1798,7 @@ void C_DrawConsole()
 			std::string download;
 
 			// Stamp out the text bits.
-			std::string filename = CL_DownloadFilename();
+			std::string filename = M_ExtractFileName(CL_DownloadFilename());
 			if (filename.empty())
 				filename = "...";
 			OTransferProgress progress = CL_DownloadProgress();
