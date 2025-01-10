@@ -1818,7 +1818,7 @@ void C_DrawConsole()
 			size_t dltxtlen = download.length();
 			size_t barchars = chars - dltxtlen;
 
-			if (barchars >= 2 || barchars > chars)
+			if (barchars >= 2 && barchars <= chars)
 			{
 				download.resize(chars);
 				for (size_t i = 0; i < barchars; i++)
