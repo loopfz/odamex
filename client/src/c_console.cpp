@@ -71,7 +71,7 @@ static IWindowSurface* background_surface;
 
 extern int		gametic;
 
-static unsigned int		ConRows, ConCols, ConCharSize, ConScale, PhysRows;
+static unsigned int		ConRows, ConCols, ConCharSize, ConScale;
 
 static bool				cursoron = false;
 static int				ConBottom = 0;
@@ -1091,7 +1091,6 @@ static void C_SetConsoleDimensions(int width, int height)
 	if (width != old_width || height != old_height || ConScale != old_scale)
 	{
 		ConCols = width / ConCharSize - 2;
-		PhysRows = height / ConCharSize;
 
 		// ConCols has changed so any lines of text that are currently wrapped
 		// need to be adjusted.
@@ -1592,7 +1591,7 @@ void C_NewModeAdjust()
 {
 	int surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
 
-	ConScale = con_scaletext ? con_scaletext : MAX(1, surface_height / 200);
+	ConScale = con_scaletext ? con_scaletext : MAX(1, static_cast<int>(std::round(surface_height / 450.0f)));
 	ConCharSize = 8 * ConScale;
 
 	if (I_VideoInitialized())
