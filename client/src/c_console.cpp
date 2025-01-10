@@ -1790,19 +1790,10 @@ void C_DrawConsole()
 
 	if (ConBottom >= CONPX(12))
 	{
-		const char* version = NiceVersion();
-
-		// print the Odamex version in gold in the bottom right corner of console
-		screen->PrintStr(primary_surface_width - CONPX(8) - C_StringWidth(version),
-		                 ConBottom - CONPX(12), version, CR_ORANGE, true, ConScale);
-
-		// Amount of space remaining.
-		int remain = primary_surface_width - CONPX(16) - C_StringWidth(version);
-
 		if (CL_IsDownloading())
 		{
 			// Use the remaining space for a download bar.
-			size_t chars = remain / C_StringWidth(" ");
+			size_t chars = (primary_surface_width - CONPX(8)) / C_StringWidth(" ");
 			std::string download;
 
 			// Stamp out the text bits.
@@ -1824,7 +1815,7 @@ void C_DrawConsole()
 			// Stamp out the bar...if we have enough room - if we at tiny
 			// resolutions we may not.
 			size_t dltxtlen = download.length();
-			size_t barchars = chars - dltxtlen;
+			int barchars = chars - static_cast<int>(dltxtlen);
 
 			if (barchars >= 2)
 			{
@@ -1849,6 +1840,14 @@ void C_DrawConsole()
 
 			// Draw the thing.
 			screen->PrintStr(left + CONPX(2), ConBottom - CONPX(12), download.c_str(), CR_GREEN, true, ConScale);
+		}
+		else
+		{
+			const char* version = NiceVersion();
+
+			// print the Odamex version in gold in the bottom right corner of console
+			screen->PrintStr(primary_surface_width - CONPX(8) - C_StringWidth(version),
+			                 ConBottom - CONPX(12), version, CR_ORANGE, true, ConScale);
 		}
 
 		if (TickerMax)
