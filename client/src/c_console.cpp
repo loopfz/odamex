@@ -1815,9 +1815,9 @@ void C_DrawConsole()
 			// Stamp out the bar...if we have enough room - if we at tiny
 			// resolutions we may not.
 			size_t dltxtlen = download.length();
-			int barchars = chars - static_cast<int>(dltxtlen);
+			size_t barchars = chars - dltxtlen;
 
-			if (barchars >= 2)
+			if (barchars >= 2 || barchars > chars)
 			{
 				download.resize(chars);
 				for (size_t i = 0; i < barchars; i++)
