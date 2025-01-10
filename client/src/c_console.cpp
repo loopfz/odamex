@@ -71,6 +71,7 @@ static IWindowSurface* background_surface;
 
 extern int		gametic;
 
+static int ConCharSize;
 static unsigned int		ConRows, ConCols, PhysRows;
 
 static bool				cursoron = false;
@@ -95,6 +96,7 @@ static bool midprinting;
 #define SCROLLDN 2
 #define SCROLLNO 0
 
+EXTERN_CVAR(con_scaletext)
 EXTERN_CVAR(con_coloredmessages)
 EXTERN_CVAR(con_buffersize)
 EXTERN_CVAR(show_messages)
@@ -220,8 +222,7 @@ ConsoleLine ConsoleLine::split(size_t max_width)
 		else if (*s == '-')
 			break_pos = s + 1 - text.c_str();
 
-		const size_t character_width = 8;
-		if (width + character_width > max_width)
+		if (width + ConCharSize > max_width)
 		{
 			// Is this word is too long to fit on the line?
 			// Breaking it here is the only option.
@@ -247,7 +248,7 @@ ConsoleLine ConsoleLine::split(size_t max_width)
 		}
 
 		s++;
-		width += character_width;
+		width += ConCharSize;
 	}
 
 	// didn't have to wrap
@@ -919,6 +920,11 @@ CVAR_FUNC_IMPL(msgmidcolor)
 	setmsgcolor(PRINTLEVELS-1, var.cstring());
 }
 
+CVAR_FUNC_IMPL(con_scaletext)
+{
+	C_NewModeAdjust();
+}
+
 // NES - Activating this locks the scroll position in place when
 //       scrolling up. Otherwise, any new messages will
 //       automatically pull the console back to the bottom.
@@ -1014,7 +1020,7 @@ static int C_StringWidth(const char* str)
 			continue;
 		}
 
-		width += 8; 
+		width += ConCharSize;
 		str++;
 	}
 
@@ -1081,12 +1087,12 @@ void C_InitConsole()
 //
 static void C_SetConsoleDimensions(int width, int height)
 {
-	static int old_width = -1, old_height = -1;
+	static int old_width = -1, old_height = -1, old_scale = -1;
 
-	if (width != old_width || height != old_height)
+	if (width != old_width || height != old_height || con_scaletext != old_scale)
 	{
-		ConCols = width / 8 - 2;
-		PhysRows = height / 8;
+		ConCols = width / ConCharSize - 2;
+		PhysRows = height / ConCharSize;
 
 		// ConCols has changed so any lines of text that are currently wrapped
 		// need to be adjusted.
@@ -1108,18 +1114,19 @@ static void C_SetConsoleDimensions(int width, int height)
 				}
 			}
 
-			if ((unsigned)C_StringWidth(current_line_it->text.c_str()) > ConCols*8)
+			if ((unsigned)C_StringWidth(current_line_it->text.c_str()) > ConCols*ConCharSize)
 			{
 				ConsoleLineList::iterator next_line_it = current_line_it;
 				++next_line_it;
 
-				ConsoleLine new_line = current_line_it->split(ConCols*8);
+				ConsoleLine new_line = current_line_it->split(ConCols*ConCharSize);
 				Lines.insert(next_line_it, new_line);
 			}
 		}
 
 		old_width = width;
 		old_height = height;
+		old_scale = con_scaletext;
 	}
 }
 
@@ -1280,9 +1287,9 @@ static size_t C_PrintString(int printlevel, const char* color_code, const char* 
  
 		// Wrap the current line if it's too long.
 		unsigned int line_width = C_StringWidth(Lines.back().text.c_str());
-		if (line_width > ConCols*8)
+		if (line_width > ConCols*ConCharSize)
 		{
-			new_line = Lines.back().split(ConCols*8);
+			new_line = Lines.back().split(ConCols*ConCharSize);
 			Lines.push_back(new_line);
 		}
 		
@@ -1467,8 +1474,8 @@ void C_Ticker()
 			else
 				RowAdjust++;
 
-			if (RowAdjust > ConRows - ConBottom / 8)
-				RowAdjust = ConRows - ConBottom / 8;
+			if (RowAdjust > ConRows - ConBottom / ConCharSize)
+				RowAdjust = ConRows - ConBottom / ConCharSize;
 		}
 		else if (ScrollState == SCROLLDN)
 		{
@@ -1483,8 +1490,8 @@ void C_Ticker()
 				RowAdjust = 0;
 		}
 
-		if (RowAdjust + (ConBottom/8) + 1 > (unsigned int)con_buffersize.asInt())
-			RowAdjust = con_buffersize.asInt() - ConBottom;
+		if (RowAdjust + (ConBottom/ConCharSize) + 1 > (unsigned int)con_buffersize.asInt())
+			RowAdjust = con_buffersize.asInt() - (ConBottom/ConCharSize);
 	}
 
 	if (--CursorTicker <= 0)
@@ -1584,12 +1591,14 @@ void C_AdjustBottom()
 //
 void C_NewModeAdjust()
 {
+	ConCharSize = 8 * con_scaletext;
+
 	int surface_width = I_GetSurfaceWidth(), surface_height = I_GetSurfaceHeight();
 
 	if (I_VideoInitialized())
 		C_SetConsoleDimensions(surface_width, surface_height);
 	else
-		C_SetConsoleDimensions(80 * 8, 25 * 8);
+		C_SetConsoleDimensions(80 * ConCharSize, 25 * ConCharSize);
 
 	// clear HUD notify text
 	C_FlushDisplay();
@@ -1727,27 +1736,30 @@ void C_DisplayTicker()
 		}
 	}
 
-	if (RowAdjust + (ConBottom / 8) + 1 > (unsigned int)con_buffersize.asInt())
-		RowAdjust = con_buffersize.asInt() - ConBottom;
+	if (RowAdjust + (ConBottom / ConCharSize) + 1 > (unsigned int)con_buffersize.asInt())
+		RowAdjust = con_buffersize.asInt() - (ConBottom / ConCharSize);
 }
+
 
 //
 // C_DrawConsole
 //
 void C_DrawConsole()
 {
+	#define CONPX(A) ((A) * con_scaletext)
+
 	IWindowSurface* primary_surface = I_GetPrimarySurface();
 	int primary_surface_width = primary_surface->getWidth();
 	int primary_surface_height = primary_surface->getHeight();
 
-	int left = 8;
-	size_t lines = (ConBottom - 12) / 8;
+	int left = CONPX(8);
+	size_t lines = (ConBottom - CONPX(12)) / CONPX(8);
 
 	int offset;
-	if (lines * 8 > ConBottom - 16)
-		offset = -16;
+	if (lines * CONPX(8) > ConBottom - CONPX(16))
+		offset = CONPX(-16);
 	else
-		offset = -12;
+		offset = CONPX(-12);
 
 	if (ConsoleState == c_up || ConBottom == 0)
 	{
@@ -1777,16 +1789,16 @@ void C_DrawConsole()
 		background_surface->unlock();
 	}
 
-	if (ConBottom >= 12)
+	if (ConBottom >= CONPX(12))
 	{
 		const char* version = NiceVersion();
 
 		// print the Odamex version in gold in the bottom right corner of console
-		screen->PrintStr(primary_surface_width - 8 - C_StringWidth(version),
-		                 ConBottom - 12, version, CR_ORANGE);
+		screen->PrintStr(primary_surface_width - CONPX(8) - C_StringWidth(version),
+		                 ConBottom - CONPX(12), version, CR_ORANGE, true, con_scaletext);
 
 		// Amount of space remaining.
-		int remain = primary_surface_width - 16 - C_StringWidth(version);
+		int remain = primary_surface_width - CONPX(16) - C_StringWidth(version);
 
 		if (CL_IsDownloading())
 		{
@@ -1837,13 +1849,13 @@ void C_DrawConsole()
 			}
 
 			// Draw the thing.
-			screen->PrintStr(left + 2, ConBottom - 12, download.c_str(), CR_GREEN);
+			screen->PrintStr(left + CONPX(2), ConBottom - CONPX(12), download.c_str(), CR_GREEN, true, con_scaletext);
 		}
 
 		if (TickerMax)
 		{
 			char tickstr[256];
-			size_t i, tickend = ConCols - primary_surface_width / 90 - 6;
+			size_t i, tickend = ConCols - primary_surface_width / CONPX(90) - 6;
 			size_t tickbegin = 0;
 
 			if (TickerLabel)
@@ -1864,7 +1876,7 @@ void C_DrawConsole()
 			tickstr[i] = -125;
 			size_t buflen = 256 - tickend - 3;
 			snprintf(tickstr + tickend + 3, buflen, "%u%%", (TickerAt * 100) / TickerMax);
-			screen->PrintStr(8, ConBottom - 12, tickstr);
+			screen->PrintStr(CONPX(8), ConBottom - CONPX(12), tickstr, -1, true, con_scaletext);
 		}
 	}
 
@@ -1938,8 +1950,8 @@ void C_DrawConsole()
 						rowstring[col - 1] = ' ';
 				}
 
-				screen->PrintStr(left, offset + (lines + l + 1) * 8, rowstring,
-				                 CR_YELLOW);
+				screen->PrintStr(left, offset + (lines + l + 1) * CONPX(8), rowstring,
+				                 CR_YELLOW, true, con_scaletext);
 			}
 
 			// Render an overflow message if necessary.
@@ -1947,8 +1959,8 @@ void C_DrawConsole()
 			{
 				snprintf(rowstring, ARRAY_LENGTH(rowstring), "...and %zu more...",
 				         ::CmdCompletions.size() - (cLines * cColumns));
-				screen->PrintStr(left, offset + (lines + cLines + 1) * 8, rowstring,
-				                 CR_YELLOW);
+				screen->PrintStr(left, offset + (lines + cLines + 1) * CONPX(8), rowstring,
+				                 CR_YELLOW, true, con_scaletext);
 			}
 		}
 
@@ -1963,12 +1975,12 @@ void C_DrawConsole()
 			const char* str = current_line_it->text.c_str();
 			const char* color_code = current_line_it->color_code.c_str();
 			int color = color_code[0] != '\0' ? V_GetTextColor(color_code) : CR_GRAY;
-			screen->PrintStr(left, offset + lines * 8, str, color);
+			screen->PrintStr(left, offset + lines * CONPX(8), str, color, true, con_scaletext);
 		}
 
-		if (ConBottom >= 20)
+		if (ConBottom >= CONPX(20))
 		{
-			screen->PrintStr(left, ConBottom - 20, "]", CR_TAN);
+			screen->PrintStr(left, ConBottom - CONPX(20), "]", CR_TAN, true, con_scaletext);
 
 			size_t cmdline_len = std::min<size_t>(CmdLine.text.length() - CmdLine.scrolled_columns, ConCols - 1);
 			if (cmdline_len)
@@ -1977,27 +1989,29 @@ void C_DrawConsole()
 				strncpy(str, CmdLine.text.c_str() + CmdLine.scrolled_columns, cmdline_len);
 				str[cmdline_len] = '\0';
 				bool use_color_codes = false;
-				screen->PrintStr(left + 8, ConBottom - 20, str, CR_GRAY, use_color_codes);
+				screen->PrintStr(left + CONPX(8), ConBottom - CONPX(20), str, CR_GRAY, use_color_codes, con_scaletext);
 			}
 
 			if (cursoron)
 			{
 				const char str[] = "_";
 				size_t cursor_offset = CmdLine.cursor_position - CmdLine.scrolled_columns;
-				screen->PrintStr(left + 8 + 8 * cursor_offset, ConBottom - 20, str, CR_TAN);
+				screen->PrintStr(left + CONPX(8) + CONPX(8) * cursor_offset, ConBottom - CONPX(20), str, CR_TAN, true, con_scaletext);
 			}
 
-			if (RowAdjust && ConBottom >= 28)
+			if (RowAdjust && ConBottom >= CONPX(28))
 			{
 				// Indicate that the view has been scrolled up (10)
 				// and if we can scroll no further (12)
 				const char scrolled_up_str[] = "\012";		// 10 = \012 octal
 				const char no_scroll_str[] = "\014";		// 12 = \014 octal
-				const char* str = (RowAdjust + ConBottom/8 < ConRows) ? scrolled_up_str : no_scroll_str;
-				screen->PrintStr(0, ConBottom - 28, str);
+				const char* str = (RowAdjust + ConBottom/CONPX(8) < ConRows) ? scrolled_up_str : no_scroll_str;
+				screen->PrintStr(0, ConBottom - CONPX(28), str, -1, true, con_scaletext);
 			}
 		}
 	}
+
+	#undef CONPX
 }
 
 
@@ -2099,11 +2113,11 @@ static bool C_HandleKey(const event_t* ev)
 		}
 		else if (Key_IsPageUpKey(ch, NumLockEnabled))
 		{
-			if ((int)(ConRows) > (int)(ConBottom / 8))
+			if ((int)(ConRows) > (int)(ConBottom / ConCharSize))
 			{
 				if (KeysShifted)
 					// Move to top of console buffer
-					RowAdjust = ConRows - ConBottom / 8;
+					RowAdjust = ConRows - ConBottom / ConCharSize;
 				else
 					// Start scrolling console buffer up
 					ScrollState = SCROLLUP;
